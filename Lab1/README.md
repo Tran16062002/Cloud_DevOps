@@ -94,6 +94,9 @@ http {
     include /etc/nginx/sites-enabled/*;
 }
    ```
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/nginx.conf.png)
+
 5. Конфигурация для project1.
 
 В файле /etc/nginx/sites-available/project1.example.com:
@@ -153,6 +156,8 @@ server {
     }
 }
    ```
+
+![2](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project1.example.com.png)
 
 6. Конфигурация для project2.
 
@@ -219,6 +224,9 @@ server {
     }
 }
    ```
+
+![3](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project2.example.com.png)
+
 7. Активация сайтов.
 
 - Создать симлинки
@@ -230,15 +238,30 @@ server {
    ```bash
    sudo nginx -t
    ```
+
+![4](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/nginx%20-t.png)
+
 - Перезапускать **nginx**
    ```bash
    sudo systemctl reload nginx
    ```
 8. Создать тестовые файлы проектов.
 - Project 1 (/var/www/project1/index.html):
+
+![5](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project1.index.png)
+
 - Project 1 CSS (/var/www/project1/assets/style.css):
+
+![6](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/style.css.png)
+
 - Project 2 (/var/www/project2/index.html):
+
+![7](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project2.index.png)
+
 - Project 2 API (/var/www/project2/api/test.php):
+
+![8](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/test.php.png)
+
 9. Настройка hosts файла для локального тестирования.
 
 Добвлять в /etc/hosts:
@@ -246,11 +269,31 @@ server {
 127.0.0.1 project1.example.com www.project1.example.com
 127.0.0.1 project2.example.com api.project2.example.com
 ```
+
+![9](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/hosts.png)
+
 10. Проверка работы.
-- Проверяем HTTP редирект
-- Проверяем HTTPS
-- Проверяем alias
-- Проверяем web
+
+- Проверять HTTP редирект
+
+![10](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/curl1.png)
+
+- Проверять HTTPS
+
+![11](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/curl2.png)
+
+![12](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/curl3.png)
+
+- Проверять alias
+
+![13](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/curl4.png)
+
+- Проверять web
+
+![14](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project1.web.png)
+
+![15](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project2.web.png)
+
 # Вывод
 В лаборатории я знакомилась и научилась веб-сервес **nginx**, создать **SSL** сертификатов, настраивать перенаправление **HTTP→HTTPS**, 
 добавлять псевдонимы для создания псевдонимов для путей к каталогам на сервере и тестировать работу сайта и перенаправление с помощью **curl**.
