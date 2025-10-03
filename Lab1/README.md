@@ -292,7 +292,7 @@ server {
 
 ![14](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project1.web.png)
 
-![15](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project2.web.png)
+![15](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/p2.png)
 
 # Вывод
 В лаборатории я знакомилась и научилась веб-сервес **nginx**, создать **SSL** сертификатов, настраивать перенаправление **HTTP→HTTPS**, 
