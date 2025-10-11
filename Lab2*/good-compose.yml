@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: good.Dockerfile
+    image: flaskapp:1.0
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./app_data:/app/data
+    user: "1000:1000"
+    networks:
+      - app_net
+
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - db_net
+
+volumes:
+  db_data:
+  app_data:
+
+# Каждая сеть изолирована, поэтому контейнеры не видят друг друга
+networks:
+  app_net:
+    internal: true
+  db_net:
+    internal: true
