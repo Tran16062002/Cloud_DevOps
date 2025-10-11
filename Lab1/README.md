@@ -57,7 +57,7 @@
 В файле **/etc/nginx/nginx.conf** добавлять содержимое
 
 ```bash
-   user www-data;
+user www-data;
 worker_processes auto;
 pid /run/nginx.pid;
 
@@ -93,7 +93,7 @@ http {
     # Включаем виртуальные хосты
     include /etc/nginx/sites-enabled/*;
 }
-   ```
+```
 
 ![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/nginx.conf.png)
 
@@ -102,7 +102,7 @@ http {
 В файле /etc/nginx/sites-available/project1.example.com:
 
    ```bash
-   # HTTP редирект на HTTPS
+# HTTP редирект на HTTPS
 server {
     listen 80;
     server_name project1.example.com www.project1.example.com;
@@ -164,7 +164,7 @@ server {
 В файле /etc/nginx/sites-available/project1.example.com:
 
    ```bash
-   # HTTP редирект на HTTPS
+# HTTP редирект на HTTPS
 server {
     listen 80;
     server_name project2.example.com api.project2.example.com;
