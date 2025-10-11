@@ -1,0 +1,29 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: bad.Dockerfile
+    ports:
+      - "5000:5000"
+    # Плохая практика 1: используем latest вместо фиксированной версии
+    image: flaskapp:latest
+
+    # Плохая практика 2: запускаем под root и даём доступ к / (всей файловой системе хоста)
+    volumes:
+      - /:/app/host_root
+
+    # Плохая практика 3: хардкодим пароли и переменные среды прямо в compose
+    environment:
+      - SECRET_KEY=mysecretpassword
+      - DEBUG=True
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: mydb
+    # Плохая практика 4: открываем порт базы наружу (хотя она используется только приложением)
+    ports:
+      - "5432:5432"
