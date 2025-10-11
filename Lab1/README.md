@@ -4,13 +4,13 @@
 
 # Ход работы
 
-1. Устанавливать **nginx**.
+## 1. Устанавливать **nginx**.
 
    ```bash
    sudo apt install nginx
    ```
    
-2. Структура проекта.
+## 2. Структура проекта.
   ```bash
    /var/www/
 
@@ -30,7 +30,7 @@
                
                    └── test.php
   ```
-3. Генерация SSL сертификатов.
+## 3. Генерация SSL сертификатов.
 
 - Создать директорию для сертификатов
 
@@ -52,7 +52,7 @@
     -subj "/C=RU/ST=Moscow/L=Moscow/O=Company/CN=project2.example.com"
    ```
 
-4. Основной конфигурационный файл **nginx**.
+## 4. Основной конфигурационный файл **nginx**.
 
 В файле **/etc/nginx/nginx.conf** добавлять содержимое
 
@@ -97,7 +97,7 @@ http {
 
 ![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/nginx.conf.png)
 
-5. Конфигурация для project1.
+## 5. Конфигурация для project1.
 
 В файле /etc/nginx/sites-available/project1.example.com:
 
@@ -159,7 +159,7 @@ server {
 
 ![2](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project1.example.com.png)
 
-6. Конфигурация для project2.
+## 6. Конфигурация для project2.
 
 В файле /etc/nginx/sites-available/project1.example.com:
 
@@ -227,7 +227,7 @@ server {
 
 ![3](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project2.example.com.png)
 
-7. Активация сайтов.
+## 7. Активация сайтов.
 
 - Создать симлинки
    ```bash
@@ -245,7 +245,7 @@ server {
    ```bash
    sudo systemctl reload nginx
    ```
-8. Создать тестовые файлы проектов.
+## 8. Создать тестовые файлы проектов.
 - Project 1 (/var/www/project1/index.html):
 
 ![5](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/project1.index.png)
@@ -262,7 +262,7 @@ server {
 
 ![8](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/test.php.png)
 
-9. Настройка hosts файла для локального тестирования.
+## 9. Настройка hosts файла для локального тестирования.
 
 Добвлять в /etc/hosts:
 ```bash
@@ -272,7 +272,7 @@ server {
 
 ![9](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab1/image/hosts.png)
 
-10. Проверка работы.
+## 10. Проверка работы.
 
 - Проверять HTTP редирект
 
