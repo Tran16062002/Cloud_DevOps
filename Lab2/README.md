@@ -7,7 +7,8 @@
 FROM ubuntu:latest
 
 # Устанавливаем пакеты и обновляем систему в одной строке без очистки кеша
-RUN apt-get update && apt-get install -y python3 python3-pip vim curl
+RUN apt-get update
+RUN apt-get install -y python3 python3-pip
 
 # Копируем всё содержимое директории, включая ненужные файлы
 COPY . /app
@@ -17,28 +18,25 @@ RUN pip3 install -r /app/requirements.txt
 
 # Запускаем контейнер от root
 WORKDIR /app
+
+EXPOSE 5000
+
 CMD ["python3", "app.py"]
 ```
 ## 2. Хороший Dockerfile (good.Dockerfile)
 ```bash
-# Используем лёгкий базовый образ
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Создаём отдельного пользователя для безопасности
-RUN useradd -m appuser
-
-# Устанавливаем зависимости только из requirements.txt и очищаем кеш apt
 WORKDIR /app
+
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    && pip install --no-cache-dir -r requirements.txt \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Копируем только нужные файлы приложения
-COPY app.py .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Переключаемся на непривилегированного пользователя
-USER appuser
+COPY . .
+
+ENV FLASK_ENV=production
+EXPOSE 5000
 
 CMD ["python", "app.py"]
 ```
@@ -65,13 +63,13 @@ flask==3.0.3
 - `ubuntu:latest` — большой образ, который содержит много ненужных пакетов. Это увеличивает размер контейнера и время сборки.
 - Исправлено: Использован минималистичный образ `python:3.10-slim`.
 - Размер образа стал меньше, сборка — быстрее, меньше уязвимостей.
-### Нет очистки кеша apt и кэша pip
+### Много отдельных RUN инструкций
 - После установки пакетов остаются временные файлы и кеш, что увеличивает размер образа.
 - Исправлено: После установки — `apt-get clean && rm -rf /var/lib/apt/lists/* и pip install --no-cache-dir`.
 - Образ стал легче на сотни мегабайт.
 ### COPY . /app копирует всё подряд
-- В контейнер попадают ненужные файлы (например, `.git`, тесты, временные файлы).
-- Исправлено: Копируются только нужные файлы (`COPY requirements.txt` и `COPY app.py`).
+- Каждый RUN создаёт новый слой → увеличивает размер образа и усложняет кэширование
+- Объединили команды (`RUN pip install … && apt-get clean`) и используем флаг `--no-cache-dir`
 - Быстрее сборка, меньше размер, меньше мусора в образе.
 ## 6. Плохие практики при работе с контейнерами
 ### Хранить данные внутри контейнера
