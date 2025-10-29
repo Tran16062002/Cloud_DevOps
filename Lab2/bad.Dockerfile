@@ -1,23 +1,23 @@
-# Используем большой базовый образ
 FROM ubuntu:latest
 
-# Устанавливаем пакеты и обновляем систему в одной строке без очистки кеша
-RUN apt-get update
-RUN apt-get install -y python3 python3-pip
-RUN pip3 install flask
+USER root
 
-# Копируем всё содержимое директории, включая ненужные файлы
-COPY . /app
-
-# Устанавливаем зависимости напрямую от root
-RUN pip3 install -r /app/requirements.txt
-
-# Запускаем контейнер от root
 WORKDIR /app
 
-RUN useradd -m myuser
-USER myuser
+COPY . .
 
-EXPOSE 5000
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip3 install flask && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-CMD ["python3", "app.py"]
+RUN pip3 install -r requirements.txt
+
+ENV APP_ENV=production
+ENV DATABASE_URL=sqlite:///app.db
+ENV SECRET_KEY=my-super-secret-key-12345
+
+EXPOSE 8080
+
+CMD python3 app.py
