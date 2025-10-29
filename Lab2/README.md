@@ -187,10 +187,23 @@ docker run -d --name redis redis
 docker build -f bad.Dockerfile -t bad-app .
 docker run -p 5000:5000 bad-app
 ```
+### Результат:
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/bad1.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/bad2.png)
 ```bash
 docker build -f good.Dockerfile -t good-app .
 docker run -p 5000:5000 good-app
 ```
+### Результат:
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/good1.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/good2.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/run.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/check.png)
+
 # Вывод
 - В этой лабораторной работе показано, как выбор базового образа, порядок инструкций и настройка окружения
 влияет на размер, безопасность и удобство использования контейнера.
