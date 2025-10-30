@@ -140,51 +140,46 @@ flask==2.3.3
 **Пример неправильного использования:**
 
 ```bash
-docker run -d --name my-database my-postgres-image
+docker run -d --name my-database good-app
 ```
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/bad-prac.png)
+
 **Правильный подход:**
 
 ```bash
 # Использование volumes
-docker run -d --name my-database -v postgres-data:/var/lib/postgresql/data my-postgres-image
+docker run -d --name my-database1 -v postgres-data:/var/lib/postgresql/data my-app
 
 # Или bind mounts
-docker run -d --name my-database -v /host/path:/var/lib/postgresql/data my-postgres-image
+docker run -d --name my-database1 -v /host/path:/var/lib/postgresql/data my-app
 ```
-### Запуск множества процессов в одном контейнере
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/good-prac.png)
+### Запуск контейнеров с избыточными привилегиями
 **Проблема:**
-Запуск нескольких несвязанных процессов в одном контейнере (например, веб-сервер и база данных).
+Запуск контейнеров с избыточными привилегиями
 
 **Почему это плохо:**
 
-- Усложняется мониторинг и логирование
+- Флаг `--privileged` дает контейнеру полный доступ к хостовой системе
 
-- Проблемы с управлением жизненным циклом процессов
+- Монтирование корневой файловой системы хоста (/) крайне опасно
 
-- Нарушение принципа единственной ответственности
-
-- Трудности с масштабированием
-
-- Сложность в отладке проблем
+- Контейнер может модифицировать хост-систему
 
 **Пример неправильного использования:**
 
 ```bash
-CMD service nginx start && service mysql start && tail -f /dev/null
+docker run --privileged -v /:/host -p 5000:5000 my-app
 ```
 **Правильный подход:**
 
 ```bash
-# Запуск каждого сервиса в отдельном контейнере
-docker run -d --name web-server nginx
-docker run -d --name database mysql
-docker run -d --name redis redis
-
-# Использование docker-compose для оркестрации
+docker run --user 1000:1000 --read-only -v /tmp/app-data:/data -p 5000:5000 my-app
 ```
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/prac2.png)
 ## 7. Запуск проекта
 ```bash
-docker build -f bad.Dockerfile -t bad-app .
+docker build -t bad-app -f bad.Dockerfile .
 docker run -p 5000:5000 bad-app
 ```
 ### Результат:
@@ -192,7 +187,7 @@ docker run -p 5000:5000 bad-app
 
 ![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2/images/bad2.png)
 ```bash
-docker build -f good.Dockerfile -t good-app .
+docker build -t good-app -f good.Dockerfile .
 docker run -p 5000:5000 good-app
 ```
 ### Результат:
