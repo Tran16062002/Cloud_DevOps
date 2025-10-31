@@ -1,109 +1,170 @@
 # Лабораторная работа №2 со звездочкой
 Чан Тхи Лиен К3240
 # Ход работы
-## 1. Плохой docker-compose.yml (bad-compose.yml)
+## 1. Плохой docker-compose.yml (docker-compose.bad.yml)
 ```bash
-version: '3'
+version: '2.0'
+
 services:
-  app:
-    build:
-      context: .
-      dockerfile: bad.Dockerfile
+  web:
+    image: nginx:latest   # bad practice 1: использовать latest
     ports:
-      - "5000:5000"
-    # Плохая практика 1: используем latest вместо фиксированной версии
-    image: flaskapp:latest
-
-    # Плохая практика 2: запускаем под root и даём доступ к / (всей файловой системе хоста)
-    volumes:
-      - /:/app/host_root
-
-    # Плохая практика 3: хардкодим пароли и переменные среды прямо в compose
+      - "5000:80"
     environment:
-      - SECRET_KEY=mysecretpassword
-      - DEBUG=True
+      - ENV=production
+    restart: always
 
   db:
-    image: postgres:latest
+    image: postgres      # bad practice 2: не указывать версию
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: mydb
-    # Плохая практика 4: открываем порт базы наружу (хотя она используется только приложением)
-    ports:
-      - "5432:5432"
-```
-## 2. Хороший docker-compose.yml (good-compose.yml)
-```bash
-version: '3.9'
-services:
-  app:
-    build:
-      context: .
-      dockerfile: good.Dockerfile
-    image: flaskapp:1.0
-    ports:
-      - "5000:5000"
-    env_file:
-      - .env
-    volumes:
-      - ./app_data:/app/data
-    user: "1000:1000"
-    networks:
-      - app_net
-
-  db:
-    image: postgres:15-alpine
-    env_file:
-      - .env
+      POSTGRES_PASSWORD: mysecretpassword
     volumes:
       - db_data:/var/lib/postgresql/data
-    networks:
-      - db_net
+
+  cache:
+    image: redis          # bad practice 3: отсутствие ресурсов, зависит от остальных
+    restart: always
+    environment:
+      - REDIS_PASSWORD=secret
 
 volumes:
   db_data:
-  app_data:
-
-# Каждая сеть изолирована, поэтому контейнеры не видят друг друга
-networks:
-  app_net:
-    internal: true
-  db_net:
-    internal: true
 ```
-## 3. Файл .env
+## 2. Хороший docker-compose.yml (docker-compose.good.yml)
 ```bash
-SECRET_KEY=super_secret_key
-DEBUG=False
-POSTGRES_USER=appuser
-POSTGRES_PASSWORD=securepassword123
-POSTGRES_DB=mydatabase
+version: '2.0'
+
+services:
+  web:
+    image: nginx:1.25.0        # фиксированная версия
+    ports:
+      - "5000:80"
+    environment:
+      ENV: production
+    restart: unless-stopped
+    networks:
+      - isolated_network
+
+
+  db:
+    image: postgres:16.1       # фиксированная версия
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - isolated_network
+
+  cache:
+    image: redis:7.2
+    environment:
+      REDIS_PASSWORD: secret
+    networks:
+      - isolated_network
+
+
+volumes:
+  db_data:
+
+networks:
+  isolated_network:
+    driver: bridge
 ```
-## 4. Плохие практики в bad-compose.yml
+## 3. Плохие практики в docker-compose.bad.yml
 | № | Плохая практика | Почему плохо | Как исправлено | Эффект |
 |---|------------------|---------------|----------------|--------|
-| 1 | Использование `latest` в `image:` | `latest` меняется при каждом обновлении, непредсказуемое поведение | Фиксирована версия (`flaskapp:1.0`, `postgres:15-alpine`) | Повторяемость сборки |
-| 2 | Проброс всей файловой системы (`/:/app/host_root`) | Очень опасно — контейнер получает доступ ко всему хосту | Ограничен том `./app_data:/app/data` | Безопасность и изоляция |
-| 3 | Секреты и пароли в `environment:` прямо в файле | Секреты могут утечь в репозиторий | Использован `.env` файл | Безопасное хранение переменных |
-| 4 | Порт базы данных 5432 открыт наружу | Любой может подключиться к базе | Порт убран, контейнер изолирован внутренней сетью | Безопасность БД |
-## 5. Как контейнеры поднимаются, но не "видят" друг друга
-### В хорошем файле мы создали **две разные сети**:
-- `app_net` — для Flask-приложения  
-- `db_net` — для PostgreSQL  
+| 1 | Использование `latest` или не указана версия | При сборке может подтянуться любая новая версия образа, что приведёт к неожиданным поломкам. | Фиксирована версия (`nginx:1.25.0`, `postgres:16.1`, `redis:7.2`) | Сборка всегда предсказуема |
+| 2 | Формат переменных окружения `- ENV=production` | Используется старый синтаксис списка, который иногда сложно читать | Использована более современный и читаемый синтаксис `ENV: production` | Улучшает читаемость и поддержку Compose файлов |
+| 3 | Настройки перезапуска `restart: always` | Контейнер будет постоянно перезапускаться, даже если пользователь остановил проект вручную. | Использован `restart: unless-stopped` | Удобнее управлять контейнерами без неожиданных перезапусков. |
+## 4. Как контейнеры поднимаются, но не "видят" друг друга
+### Принцип изоляции:
+В изолированной версии каждый сервис помещен в отдельную Docker network. Docker создает изолированные сетевые пространства, где контейнеры могут общаться только с теми, кто находится в той же сети. 
 
-### И обе сети объявлены как **internal: true**.  
-Это означает, что Docker создаёт внутренние виртуальные сети, недоступные извне и **изолированные друг от друга**.
+### Как достигнута изоляция:  
+- Раздельные сети: Каждый сервис имеет свою собственную сеть (`web_network`, `db_network`, `cache_network`)
+
+- Отсутствие общих сетей: Сервисы не разделяют общую сеть
+
+- **Bridge driver**: Каждая сеть использует **bridge driver**, создавая изолированный сетевой мост
+### Изолированный Docker Compose файл
+```bash
+version: '2.0'
+
+services:
+  web:
+    image: nginx:1.25.0        # фиксированная версия
+    ports:
+      - "5000:80"
+    environment:
+      ENV: production
+    restart: unless-stopped
+    networks:
+      - web_network
+
+
+  db:
+    image: postgres:16.1       # фиксированная версия
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+
+  cache:
+    image: redis:7.2
+    environment:
+      REDIS_PASSWORD: secret
+    networks:
+      - cache_network
+
+
+volumes:
+  db_data:
+
+networks:
+  web_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+  cache_network:
+    driver: bridge
+```
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/run2.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/list2.png)
+
 ### В результате:
-- Контейнеры **запускаются вместе** (оба определены в одном `docker-compose.yml`);
-- Но они **не имеют маршрутов друг к другу** — ни по имени сервиса, ни по IP.
-## 6. Как запустить
+В хорошем файле контейнеры помещены в разные сети:
+- `web` в `web_network`
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/web.png)
+
+- `db` в `db_network`
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/db.png)
+
+- `cache` в `cache_network`
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/cache.png)
+
+## 5. Как запустить
 ```bash
-docker compose -f bad-compose.yml up --build
+sudo docker-compose -f docker-compose.bad.yml up -d
 ```
 ```bash
-docker compose -f good-compose.yml up --build
+sudo docker-compose -f docker-compose.good.yml up -d
 ```
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/run.png)
+
+### Проверка:
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/list1.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/bad1.png)
+
+![1](https://github.com/Tran16062002/Cloud_DevOps/blob/main/Lab2*/Images/good1.png)
+
 # Вывод
 - В результате работы были продемонстрированы плохие и хорошие практики при создании Docker Compose файлов.
 - Исправленные ошибки позволили:
